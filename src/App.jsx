@@ -16,7 +16,7 @@ const App = () => {
   const [podeComprar, setPodeComprar] = useState(false);
 
   // Lembra-te de substituir pelo URL real do teu backend no Render
-  const API_URL = "https://backend1-yegx.onrender.com/generate";
+  const API_URL = import.meta.env.VITE_API_URL;
 
   // 2. LÓGICA DE ENVIO PARA O BACKEND
   const handleGerarPreview = async () => {
