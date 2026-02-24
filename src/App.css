@@ -11,39 +11,28 @@ body {
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  width: 100vw; /* Ocupa 100% da largura do navegador */
+  height: 100vh; /* Ocupa 100% da altura do navegador */
 }
 
 /* Responsividade: Lado a lado no PC, coluna no Telemóvel */
 @media (min-width: 992px) {
   .app-container {
-    flex-direction: row;
-    height: 100vh;
+    flex-direction: row; /* Coloca lado a lado no PC */
   }
 }
 
 /* Sidebar lateral */
 .sidebar {
-  width: 100%;
-  max-width: 400px;
-  background: #ffffff;
-  padding: 40px;
-  box-sizing: border-box;
-  overflow-y: auto;
-  box-shadow: 2px 0 20px rgba(0,0,0,0.05);
-  z-index: 10;
-}
+    width: 380px; /* Largura fixa para o menu */
+    height: 100%;
+  }
 
 /* Área do Visualizador 3D */
 .viewport {
-  flex: 1;
-  background: #e5e5e7;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-}
+    flex: 1; /* Ocupa TODO o espaço que sobrar à direita */
+    height: 100%;
+  }
 
 h1 {
   font-size: 28px;
