@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Scene3D from './components/Scene3D';
+import './App.css'; // Importa o novo CSS
 
 const App = () => {
-  // 1. ESTADO INICIAL
   const [config, setConfig] = useState({
     nome: 'BOBI',
     telefone: '912345678',
-    forma: 'osso',    // 'osso', 'coracao', 'circulo'
-    tamanho: 'M',     // 'S', 'M', 'L'
+    forma: 'osso',
+    tamanho: 'M',
     temNFC: false
   });
 
@@ -15,59 +15,57 @@ const App = () => {
   const [stlUrl, setStlUrl] = useState(null);
   const [podeComprar, setPodeComprar] = useState(false);
 
-  // Lembra-te de substituir pelo URL real do teu backend no Render
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // 2. LÓGICA DE ENVIO PARA O BACKEND
+  // REGRA: S não pode ter NFC e certas formas
+  useEffect(() => {
+    if (config.tamanho === 'S') {
+      let novaForma = config.forma;
+      // Se for S e estiver em Coração/Círculo, volta para Osso
+      if (config.forma === 'coracao' || config.forma === 'circulo') {
+        novaForma = 'osso';
+      }
+      setConfig(prev => ({ ...prev, temNFC: false, forma: novaForma }));
+    }
+  }, [config.tamanho]);
+
   const handleGerarPreview = async () => {
     setLoading(true);
     setStlUrl(null);
     setPodeComprar(false);
-
     try {
       const response = await fetch(`${API_URL}/gerar-tag`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(config)
       });
-
       const data = await response.json();
-
       if (response.ok && data.url) {
         setStlUrl(data.url);
         setPodeComprar(true);
       } else {
-        alert("Erro ao gerar o modelo. Verifica o servidor.");
+        alert("Erro ao gerar modelo.");
       }
     } catch (e) {
-      console.error(e);
-      alert("Erro de ligação. O backend está ligado?");
+      alert("Erro de ligação.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleAdicionarAoCarrinho = () => {
-    const item = {
-      ...config,
-      linkFicheiro: stlUrl,
-      preco: 14.90
-    };
-    console.log("Adicionado ao carrinho:", item);
+    console.log("Adicionado:", config);
     alert(`Sucesso! A medalha do ${config.nome} foi guardada.`);
   };
 
   return (
-    <div style={containerStyle}>
-      
-      {/* MENU LATERAL DE CONFIGURAÇÃO */}
-      <div style={sidebarStyle}>
-        <h1 style={titleStyle}>PetTag <span style={{color: '#3b82f6'}}>3D</span></h1>
+    <div className="app-container">
+      <div className="sidebar">
+        <h1>PetTag <span style={{color: '#0071e3'}}>3D</span></h1>
         
-        <div style={inputGroup}>
-          <label style={labelStyle}>NOME DO PET</label>
+        <div className="input-group">
+          <label>Nome do Pet</label>
           <input 
-            style={inputStyle}
             type="text" 
             maxLength={12} 
             value={config.nome} 
@@ -75,123 +73,81 @@ const App = () => {
           />
         </div>
 
-        <div style={inputGroup}>
-          <label style={labelStyle}>TELEFONE (VERSO)</label>
+        <div className="input-group">
+          <label>Telefone (Verso)</label>
           <input 
-            style={inputStyle}
             type="text" 
             disabled={config.temNFC}
-            placeholder={config.temNFC ? "NFC Ativo" : "Teu contacto"}
+            placeholder={config.temNFC ? "Gravado no Chip" : "Teu contacto"}
             value={config.telefone} 
             onChange={e => setConfig({...config, telefone: e.target.value})} 
           />
         </div>
 
-        <div style={inputGroup}>
-          <label style={labelStyle}>FORMA</label>
-          <select 
-            style={inputStyle} 
-            value={config.forma} 
-            onChange={e => setConfig({...config, forma: e.target.value})}
-          >
-            <option value="osso">🦴 Osso</option>
-            <option value="coracao">❤️ Coração</option>
-            <option value="circulo">🔘 Círculo</option>
-          </select>
-        </div>
-
-        <div style={inputGroup}>
-          <label style={labelStyle}>TECNOLOGIA</label>
-          <div 
-            style={toggleStyle} 
-            onClick={() => setConfig({...config, temNFC: !config.temNFC})}
-          >
-            <div style={{
-              ...toggleCircle, 
-              transform: config.temNFC ? 'translateX(20px)' : 'translateX(0)',
-              background: config.temNFC ? '#3b82f6' : '#555'
-            }} />
-            <span style={{marginLeft: '40px', fontSize: '12px'}}>
-              {config.temNFC ? "CHIP NFC ATIVO" : "APENAS GRAVAÇÃO"}
-            </span>
-          </div>
-        </div>
-
-        <div style={inputGroup}>
-          <label style={labelStyle}>TAMANHO</label>
-          <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="input-group">
+          <label>Tamanho</label>
+          <div className="size-grid">
             {['S', 'M', 'L'].map(t => (
               <button 
                 key={t} 
+                className={`btn-size ${config.tamanho === t ? 'active' : ''}`}
                 onClick={() => setConfig({...config, tamanho: t})}
-                style={{ 
-                  ...sizeButtonStyle, 
-                  background: config.tamanho === t ? '#3b82f6' : '#222' 
-                }}
               >{t}</button>
             ))}
           </div>
         </div>
 
-        <button 
-          onClick={handleGerarPreview} 
-          disabled={loading} 
-          style={{...btnGerar, opacity: loading ? 0.6 : 1}}
-        >
-          {loading ? 'A PROCESSAR...' : 'VER PREVIEW 3D'}
+        <div className="input-group">
+          <label>Forma</label>
+          <select 
+            value={config.forma} 
+            onChange={e => setConfig({...config, forma: e.target.value})}
+          >
+            <option value="osso">🦴 Osso</option>
+            <option value="coracao" disabled={config.tamanho === 'S'}>❤️ Coração (Apenas M/L)</option>
+            <option value="circulo" disabled={config.tamanho === 'S'}>🔘 Círculo (Apenas M/L)</option>
+          </select>
+        </div>
+
+        <div className="input-group">
+          <label>Tecnologia</label>
+          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+            <input 
+              type="checkbox" 
+              checked={config.temNFC} 
+              disabled={config.tamanho === 'S'}
+              onChange={e => setConfig({...config, temNFC: e.target.checked})}
+            />
+            <span style={{fontSize: '14px'}}>Incluir Chip NFC</span>
+          </div>
+          {config.tamanho === 'S' && <p className="restriction-text">* S não suporta NFC.</p>}
+        </div>
+
+        <button className="btn-primary" onClick={handleGerarPreview} disabled={loading}>
+          {loading ? 'A PERSONALIZAR...' : 'VISUALIZAR EM 3D'}
         </button>
 
         {podeComprar && (
-          <button onClick={handleAdicionarAoCarrinho} style={btnCarrinho}>
+          <button className="btn-primary btn-cart" onClick={handleAdicionarAoCarrinho}>
             🛒 ADICIONAR AO CARRINHO
           </button>
         )}
       </div>
 
-      {/* ÁREA DE VISUALIZAÇÃO 3D */}
-      <div style={viewportStyle}>
+      <div className="viewport">
         {loading ? (
-          <div style={loaderContainer}>
+          <div style={{textAlign: 'center'}}>
             <div className="spinner"></div>
-            <p style={{marginTop: '15px', color: '#888'}}>A personalizar o teu modelo no servidor...</p>
+            <p style={{color: '#86868b', marginTop: '15px'}}>Criando o teu modelo único...</p>
           </div>
         ) : stlUrl ? (
           <Scene3D stlUrl={stlUrl} />
         ) : (
-          <div style={{color: '#444', textAlign: 'center'}}>
-            <p>Configura os dados e clica em <b>Ver Preview</b></p>
-            <small>Vais ver o ficheiro real que será impresso.</small>
-          </div>
+          <p style={{color: '#86868b'}}>Personaliza e clica em Visualizar</p>
         )}
       </div>
-
-      <style>{`
-        .spinner {
-          width: 40px; height: 40px;
-          border: 4px solid #222;
-          border-top: 4px solid #3b82f6;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-      `}</style>
     </div>
   );
 };
-
-// --- ESTILOS ---
-const containerStyle = { display: 'flex', height: '100vh', background: '#050505', color: 'white', fontFamily: 'Inter, sans-serif' };
-const sidebarStyle = { width: '340px', padding: '30px', borderRight: '1px solid #222', display: 'flex', flexDirection: 'column', gap: '5px', overflowY: 'auto' };
-const viewportStyle = { background: '#666', flex: 1, position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' };
-const titleStyle = { fontSize: '22px', fontWeight: '800', marginBottom: '20px', letterSpacing: '-1px' };
-const inputGroup = { marginBottom: '18px' };
-const labelStyle = { display: 'block', fontSize: '10px', color: '#666', marginBottom: '6px', fontWeight: 'bold', letterSpacing: '1px' };
-const inputStyle = { width: '100%', padding: '12px', background: '#111', border: '1px solid #222', color: 'white', borderRadius: '6px', outline: 'none' };
-const sizeButtonStyle = { flex: 1, padding: '10px', border: 'none', color: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', transition: '0.2s' };
-const btnGerar = { width: '100%', padding: '15px', background: 'white', color: 'black', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' };
-const btnCarrinho = { width: '100%', padding: '15px', background: '#f59e0b', color: 'black', border: 'none', borderRadius: '6px', fontWeight: '900', cursor: 'pointer', marginTop: '10px', animation: 'fadeIn 0.5s' };
-const toggleStyle = { width: '100%', height: '40px', background: '#111', borderRadius: '6px', border: '1px solid #222', position: 'relative', display: 'flex', alignItems: 'center', cursor: 'pointer', padding: '0 10px' };
-const toggleCircle = { width: '16px', height: '16px', borderRadius: '50%', position: 'absolute', transition: '0.3s' };
-const loaderContainer = { display: 'flex', flexDirection: 'column', alignItems: 'center' };
 
 export default App;
