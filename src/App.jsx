@@ -69,7 +69,7 @@ const App = () => {
             ))}
           </div>
           <div style={{fontSize: '10px', color: '#94a3b8', textAlign: 'center'}}>
-            {config.tamanho === 'S' && "25mm x 15mm - Ideal para Gatos"}
+            {config.tamanho === 'S' && "25mm x 15mm - Ideal para Cães Pequenos"}
             {config.tamanho === 'M' && "40mm x 25mm - Ideal para Cães Médios"}
             {config.tamanho === 'L' && "55mm x 35mm - Ideal para Cães Grandes"}
           </div>
@@ -78,9 +78,9 @@ const App = () => {
         <div className="input-block">
           <label>FORMA GEOMÉTRICA</label>
           <select value={config.forma} onChange={e => setConfig({...config, forma: e.target.value})}>
-            <option value="osso">🦴 Osso Clássico</option>
-            <option value="coracao" disabled={config.tamanho === 'S'}>❤️ Coração (Apenas M/L)</option>
-            <option value="circulo" disabled={config.tamanho === 'S'}>🔘 Círculo (Apenas M/L)</option>
+            <option value="osso">🦴 Osso</option>
+            <option value="coracao" disabled={config.tamanho === 'S'}>❤️ Coração (Apenas M)</option>
+            <option value="circulo" disabled={config.tamanho === 'S'}>🔘 Círculo (Apenas M)</option>
           </select>
         </div>
 
@@ -99,7 +99,7 @@ const App = () => {
 
         {podeComprar && (
           <button className="btn-main btn-cart" onClick={() => alert("Adicionado ao carrinho!")}>
-            🛒 ADICIONAR AO CARRINHO
+            🛒 FAZER PEDIDO
           </button>
         )}
       </div>

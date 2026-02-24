@@ -11,7 +11,7 @@ function Model({ url }) {
     <mesh geometry={geom} castShadow receiveShadow>
       {/* Cor dourada viva para garantir visibilidade */}
       <meshStandardMaterial 
-        color="#FFD700" 
+        color="#2759c5" 
         metalness={0.6} 
         roughness={0.3} 
       />
@@ -21,7 +21,7 @@ function Model({ url }) {
 
 export default function Scene3D({ stlUrl }) {
   return (
-    <div style={{ width: '100%', height: '400px', background: '#050505', borderRadius: '8px' }}>
+    <div style={{ width: '100%', height: '400px', background: '#f1f5f9', borderRadius: '8px' }}>
       <Canvas shadows camera={{ position: [0, 0, 50], fov: 45 }}>
         {/* LUZES - Essencial para o objeto não ficar preto */}
         <ambientLight intensity={0.7} />
