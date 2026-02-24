@@ -136,14 +136,16 @@ const App = () => {
 
       <div className="viewport">
         {loading ? (
-          <div style={{textAlign: 'center'}}>
+          <div className="loader-box">
             <div className="spinner"></div>
-            <p style={{color: '#86868b', marginTop: '15px'}}>Criando o teu modelo único...</p>
+            <p>A personalizar a tua PetTag...</p>
           </div>
         ) : stlUrl ? (
           <Scene3D stlUrl={stlUrl} />
         ) : (
-          <p style={{color: '#86868b'}}>Personaliza e clica em Visualizar</p>
+          <div className="placeholder-text">
+            <p>Configura os detalhes e clica em <b>Visualizar</b></p>
+          </div>
         )}
       </div>
     </div>
