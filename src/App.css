@@ -22,6 +22,7 @@ body {
   background: white;
   display: flex;
   flex-direction: column;
+  z-index: 10;
 }
 
 /* O Visualizador agora ocupa todo o espaço restante */
