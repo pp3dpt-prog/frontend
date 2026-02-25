@@ -4,6 +4,7 @@ import Scene3D from './components/Scene3D';
 import './App.css';
 
 const App = () => {
+  // 1. ESTADOS (Mantidos exatamente como os teus)
   const [config, setConfig] = useState({
     nome: 'BOBI',
     telefone: '912345678',
@@ -16,15 +17,15 @@ const App = () => {
   const [stlUrl, setStlUrl] = useState(null);
   const [podeComprar, setPodeComprar] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [tipoForm, setTipoForm] = useState('orcamento');
-
+  const [tipoForm, setTipoForm] = useState('orcamento'); 
+  
   const [formDados, setFormDados] = useState({
     donoNome: '', donoTelefone: '', donoEmail: '', nif: '', morada: '',
     petRaca: '', petNascimento: '', petChip: '', petVacinas: '', 
     petVet: '', obs: '', contactoEmergencia: ''
   });
 
-  // LÓGICA DE NEGÓCIO: Mantida conforme o teu código
+  // 2. LÓGICA DE NEGÓCIO (Mantida a tua restrição do Tamanho S)
   useEffect(() => {
     if (config.tamanho === 'S') {
       setConfig(prev => ({ 
@@ -35,7 +36,7 @@ const App = () => {
     }
   }, [config.tamanho]);
 
-  // FUNÇÃO 1: Gerar Preview (Movida para fora do return)
+  // 3. FUNÇÃO GERAR PREVIEW (Movida para o sítio certo)
   const handleGerarPreview = async () => {
     setLoading(true);
     setStlUrl(null);
@@ -60,14 +61,9 @@ const App = () => {
     }
   };
 
-  // FUNÇÃO 2: Envio Duplo (Corrigida a estrutura interna)
+  // 4. FUNÇÃO DE ENVIO (WhatsApp + EmailJS)
   const finalizarEnvio = async (e) => {
     e.preventDefault();
-
-    // 1. Envio Invisível via EmailJS
-    const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
-    const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
-    const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
     const templateParams = {
       dono_nome: formDados.donoNome,
@@ -88,14 +84,19 @@ const App = () => {
       stl_url: stlUrl
     };
 
-    emailjs.send(serviceId, templateId, templateParams, publicKey)
-      .then((response) => {
-        console.log('EMAIL ENVIADO!', response.status);
-      }, (err) => {
-        console.log('ERRO EMAILJS:', err);
-      });
-
-    // 2. Mensagem WhatsApp para o Cliente
+    // Envio do Email para Produção
+    emailjs.send(
+      import.meta.env.VITE_EMAILJS_SERVICE_ID, 
+      import.meta.env.VITE_EMAILJS_TEMPLATE_ID, 
+      templateParams, 
+      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+    ).then((response) => {
+       console.log('EMAIL ENVIADO!', response.status);
+    }, (err) => {
+       console.log('ERRO EMAILJS...', err);
+    });
+        
+    // Mensagem WhatsApp para o Cliente
     const msg = `*PP3D.PT - NOVO PEDIDO DE ${tipoForm.toUpperCase()}*%0A%0A` +
       `*Dono:* ${formDados.donoNome}%0A` +
       `*Pet:* ${config.nome}%0A` +
@@ -106,6 +107,7 @@ const App = () => {
     setShowModal(false);
   };
 
+  // 5. INTERFACE (O Teu Visual)
   return (
     <div className="app-container">
       <div className="sidebar">
@@ -147,7 +149,7 @@ const App = () => {
         </div>
 
         <div className={`nfc-panel ${config.tamanho === 'S' ? 'disabled' : ''}`} 
-             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '20px'}}>
+             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '15px'}}>
           <input type="checkbox" id="nfc-toggle" checked={config.temNFC} disabled={config.tamanho === 'S'}
             onChange={e => setConfig({...config, temNFC: e.target.checked})} />
           <label htmlFor="nfc-toggle" style={{margin: 0, cursor: 'pointer', fontSize: '12px'}}>
@@ -160,14 +162,14 @@ const App = () => {
         </button>
 
         {podeComprar && (
-          <button className="btn-buy" style={{marginTop: '10px'}} onClick={() => { setTipoForm('orcamento'); setShowModal(true); }}>
+          <button className="btn-buy" onClick={() => setShowModal(true)} style={{marginTop: '10px'}}>
             🛒 FINALIZAR PEDIDO / ORÇAMENTO
           </button>
         )}
 
         <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
           <button className="btn-secondary" onClick={() => { setTipoForm('info'); setShowModal(true); }}>
-            ℹ️ Info
+            ℹ️ Informação
           </button>
           <button className="btn-secondary" onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>
             💡 Sugestão
@@ -199,9 +201,9 @@ const App = () => {
                   <input type="text" placeholder="Raça" onChange={e => setFormDados({...formDados, petRaca: e.target.value})} />
                   <input type="date" onChange={e => setFormDados({...formDados, petNascimento: e.target.value})} />
                   <input type="text" placeholder="Nº Chip Veterinário" onChange={e => setFormDados({...formDados, petChip: e.target.value})} />
-                  <input type="text" placeholder="Contacto Botão Chamada" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
+                  <input type="text" placeholder="Contacto p/ Botão Chamada" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
                   <textarea placeholder="Dados Veterinários / Alergias" className="full-width"
-                    onChange={e => setFormDados({...formDados, vet: e.target.value})} />
+                    onChange={e => setFormDados({...formDados, petVet: e.target.value})} />
                 </>
               )}
 
