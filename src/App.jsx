@@ -111,8 +111,8 @@ const App = () => {
     <div className="app-container">
       <div className="sidebar">
         <div className="logo-header">
-           <img src="/logo_pp3d.webp" alt="PP3D.PT" className="main-logo" />
-           <h2>PP3D<span>.PT</span></h2>
+          <img src="/logo_pp3d.webp" alt="PP3D.PT" className="main-logo" />
+          <h2 style={{ fontSize: '1.5rem', margin: '10px 0' }}>PP3D<span>.PT</span></h2>
         </div>
 
         <div className="input-block">
