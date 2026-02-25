@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import emailjs from '@emailjs/browser'; // Certifica-te de que instalaste: npm install @emailjs/browser
 import Scene3D from './components/Scene3D';
 import './App.css';
 
-
 const App = () => {
-  const [config, setConfig] = useState({
-    nome: 'BOBI',
-    telefone: '912345678',
-    forma: 'osso',
-    tamanho: 'M',
-    temNFC: false
-  });
+    const [config, setConfig] = useState({
+      nome: 'BOBI',
+      telefone: '912345678',
+      forma: 'osso',
+      tamanho: 'M',
+      temNFC: false
+    });
+
 
   const [loading, setLoading] = useState(false);
   const [stlUrl, setStlUrl] = useState(null);
@@ -18,14 +19,15 @@ const App = () => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [showModal, setShowModal] = useState(false);
   const [tipoForm, setTipoForm] = useState('orcamento'); // orcamento, info, sugestao
+  
 
+  // NOVOS ESTADOS: Modal e Dados do Pedido
+  
   const [formDados, setFormDados] = useState({
-    // Dados do Dono
     donoNome: '', donoTelefone: '', donoEmail: '', nif: '', morada: '',
-    // Ficha do Pet (NFC)
     petRaca: '', petNascimento: '', petChip: '', petVacinas: '', 
     petVet: '', obs: '', contactoEmergencia: ''
-    });
+  });
 
   // LÓGICA DE NEGÓCIO: Restrições de Produção
   useEffect(() => {
@@ -39,29 +41,69 @@ const App = () => {
     }
   }, [config.tamanho]);
 
-  const handleGerarPreview = async () => {
-    setLoading(true); setStlUrl(null); setPodeComprar(false);
-    try {
-      const response = await fetch(`${API_URL}/gerar-tag`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config)
-      });
-      const data = await response.json();
-      if (response.ok && data.url) { setStlUrl(data.url); setPodeComprar(true); }
-    } catch (e) { alert("Erro de ligação ao servidor."); }
-    finally { setLoading(false); }
+  // FUNÇÃO DE ENVIO DUPLO (WhatsApp + Email Invisível)
+  const finalizarEnvio = async (e) => {
+    e.preventDefault();
+
+    // 1. Envio Invisível do STL para ti (Produção)
+    const enviarEmailProducao = (linkStl) => {
+      // Chamada das variáveis do .env
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+
+      const templateParams = {
+        // Dados do Dono (Conforme o teu template)
+        dono_nome: formDados.donoNome,
+        dono_email: formDados.donoEmail,
+        dono_telefone: formDados.donoTelefone,
+        nif: formDados.nif,
+        morada: formDados.morada,
+
+        // Dados do Pet
+        nome_pet: config.nome,
+        pet_raca: formDados.petRaca,
+        pet_nascimento: formDados.petNascimento,
+        pet_chip: formDados.petChip,
+        pet_vacinas: formDados.petVacinas,
+        pet_vet: formDados.petVet,
+
+        // Configuração Técnica
+        tamanho: config.tamanho,
+        forma: config.forma,
+        tem_nfc: config.temNFC ? "Sim" : "Não",
+        contacto_emergencia: formDados.contactoEmergencia,
+        
+        // O link invisível para o teu trabalho
+        stl_url: linkStl || stlUrl
+      };
+
+      emailjs.send(serviceId, templateId, templateParams, publicKey)
+    .then((response) => {
+       console.log('SUCESSO!', response.status, response.text);
+    }, (err) => {
+       console.log('ERRO NO EMAILJS...', err);
+    });
+  };  
+        
+    // 2. Mensagem para o Cliente (WhatsApp)
+    const msg = `*PP3D.PT - NOVO PEDIDO DE ${tipoForm.toUpperCase()}*%0A%0A` +
+      `*Dono:* ${formDados.donoNome}%0A` +
+      `*Pet:* ${config.nome}%0A` +
+      `*NIF:* ${formDados.nif}%0A` +
+      `_Envio agora a foto para a Pagina Eletrónica de Pet!_`;
+
+    window.open(`https://wa.me/351961028106?text=${msg}`, '_blank');
+    setShowModal(false);
   };
 
   return (
     <div className="app-container">
+      {/* SIDEBAR COM LOGO */}
       <div className="sidebar">
-        <div className="logo-container" style={{textAlign: 'center', marginBottom: '20px'}}>
-          <img src="/logo_pp3d.webp" 
-          alt="PP3D.PT" 
-          style={{width: '120px', marginBottom: '10px'}} />
-          <div style={{fontWeight: 'bold', fontSize: '18px'}}>PP3D<span 
-          style={{color: '#3b82f6'}}>.PT</span></div>
+        <div className="logo-header">
+           <img src="/logo_pp3d.webp" alt="PP3D.PT" className="main-logo" />
+           <h2>PP3D<span>.PT</span></h2>
         </div>
 
         <div className="input-block">
@@ -124,24 +166,61 @@ const App = () => {
         </div>
 
         {podeComprar && (
-          <button className="btn-main btn-cart" onClick={() => alert("Obrigado pelo teu pedido!")}>
-            🛒 FAZER PEDIDO
+          <button className="btn-buy" onClick={() => setShowModal(true)}>
+            🛒 FINALIZAR PEDIDO / ORÇAMENTO
           </button>
         )}
+
+        <div className="extra-buttons">
+          <button onClick={() => { setTipoForm('info'); setShowModal(true); }}>ℹ️ Informação</button>
+          <button onClick={() => { setTipoForm('sugestao'); setShowModal(true); }}>💡 Sugestão</button>
+        </div>
       </div>
-    
 
       <div className="viewport">
-        {loading ? (
-          <div style={{textAlign: 'center'}}><div className="spinner" style={{margin: '0 auto'}}></div><p style={{color:'#64748b', marginTop: '10px'}}>Personalizando o teu STL...</p></div>
-        ) : stlUrl ? (
-          <Scene3D stlUrl={stlUrl} />
-        ) : (
-          <div style={{color: '#94a3b8', textAlign: 'center'}}>
-            <p>Os teus ajustes aparecerão aqui em tempo real.</p>
-          </div>
-        )}
+         {/* Visualizador 3D */}
+         {stlUrl ? <Scene3D stlUrl={stlUrl} /> : <p>Configura a tua PetTag</p>}
       </div>
+
+      {/* MODAL PROFISSIONAL */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>{tipoForm === 'orcamento' ? 'Dados para Faturação e NFC' : 'Contacto'}</h3>
+            <form onSubmit={finalizarEnvio} className="grid-form">
+              <input type="text" placeholder="Nome do Dono" required 
+                onChange={e => setFormDados({...formDados, donoNome: e.target.value})} />
+              <input type="text" placeholder="NIF (Opcional)" 
+                onChange={e => setFormDados({...formDados, nif: e.target.value})} />
+              <input type="email" placeholder="Teu Email" className="full-width" required
+                onChange={e => setFormDados({...formDados, donoEmail: e.target.value})} />
+              <input type="text" placeholder="Morada Completa de Envio" className="full-width"
+                onChange={e => setFormDados({...formDados, morada: e.target.value})} />
+
+              {/* CAMPOS NFC - Só aparecem se o chip estiver ativo */}
+              {config.temNFC && tipoForm === 'orcamento' && (
+                <>
+                  <h4 className="full-width">Ficha do Pet (Cartão Eletrónico)</h4>
+                  <input type="text" placeholder="Raça" onChange={e => setFormDados({...formDados, petRaca: e.target.value})} />
+                  <input type="date" title="Data de Nascimento" onChange={e => setFormDados({...formDados, petNascimento: e.target.value})} />
+                  <input type="text" placeholder="Nº Chip Veterinário" onChange={e => setFormDados({...formDados, petChip: e.target.value})} />
+                  <input type="text" placeholder="Contacto p/ Botão Chamada" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
+                  <textarea placeholder="Dados Veterinários / Alergias" className="full-width"
+                    onChange={e => setFormDados({...formDados, vet: e.target.value})} />
+                </>
+              )}
+
+              <textarea placeholder="Observações Adicionais" className="full-width"
+                onChange={e => setFormDados({...formDados, obs: e.target.value})} />
+
+              <div className="modal-actions full-width">
+                <button type="button" onClick={() => setShowModal(false)}>Cancelar</button>
+                <button type="submit" className="btn-confirm">Enviar para WhatsApp</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -123,30 +123,47 @@ input[type="text"], select {
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.8); /* Azul escuro semi-transparente */
+  backdrop-filter: blur(5px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
-  padding: 20px;
+  justify-content: center;
+  z-index: 9999;
 }
 
 .modal-content {
   background: white;
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  border-radius: 20px;
-  padding: 30px;
+  padding: 40px;
+  border-radius: 24px;
+  max-width: 650px;
+  width: 90%;
+  max-height: 85vh;
   overflow-y: auto;
-  color: #1a202c;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
 .grid-form {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px;
+  margin-top: 20px;
 }
 
 .full-width { grid-column: span 2; }
+
+input, textarea {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.btn-confirm {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
