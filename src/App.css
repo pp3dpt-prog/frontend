@@ -6,31 +6,29 @@ body {
 }
 
 /* Container principal ocupa o ecrã todo */
+/* Layout que dá prioridade ao visualizador 3D */
 .app-container {
   display: flex;
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Impede scroll na página toda, mantém nos elementos */
-  background-color: #f0f2f5;
+  overflow: hidden;
 }
-/* Sidebar com largura fixa e scroll próprio */
 .sidebar {
-  width: 380px; /* Largura ideal para os controlos */
+  width: 380px;
   min-width: 380px;
   height: 100%;
-  overflow-y: auto; /* Permite descer para ver todos os botões */
-  padding: 25px;
+  overflow-y: auto;
+  padding: 20px;
   background: white;
-  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-  z-index: 10;
+  display: flex;
+  flex-direction: column;
 }
 
-/* O Visualizador 3D - Ocupa todo o resto do espaço */
+/* O Visualizador agora ocupa todo o espaço restante */
 .viewport {
-  flex-grow: 1; /* Faz o visualizador expandir e ocupar o resto da largura */
+  flex: 1; 
   height: 100%;
-  position: relative;
-  background: radial-gradient(circle, #ffffff 0%, #e0e0e0 100%);
+  background: #f4f4f4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -80,28 +78,37 @@ input[type="text"], select {
   box-sizing: border-box;
 }
 
-/* Botões de Tamanho Profissionais */
+/* BOTOES COM O AZUL DA PP3D.PT */
 .size-selector {
   display: flex;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .btn-size {
   flex: 1;
-  padding: 10px;
-  border: 1px solid #e2e8f0;
+  padding: 12px;
+  border: 2px solid #ddd;
   background: white;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s;
+  font-weight: bold;
+  transition: 0.3s;
 }
 
 .btn-size.active {
-  background: #0f172a;
-  color: white;
-  border-color: #0f172a;
+  border-color: #007bff; /* Azul do teu logo */
+  background-color: #e7f3ff;
+  color: #007bff;
+}
+
+/* Espaço para as medidas por baixo */
+.size-info {
+  font-size: 11px;
+  color: #666;
+  margin-top: 5px;
+  text-align: center;
+  display: block;
 }
 
 .nfc-panel {
@@ -176,4 +183,19 @@ input, textarea {
   border-radius: 12px;
   font-weight: bold;
   cursor: pointer;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  display: inline-block;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

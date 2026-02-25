@@ -132,8 +132,18 @@ const App = () => {
           <label>TAMANHO DA TAG</label>
           <div className="size-selector">
             {['S', 'M', 'L'].map(t => (
-              <button key={t} className={`btn-size ${config.tamanho === t ? 'active' : ''}`}
-                onClick={() => setConfig({...config, tamanho: t})}>{t}</button>
+              <div key={t} style={{ flex: 1 }}>
+                <button 
+                  className={`btn-size ${config.tamanho === t ? 'active' : ''}`}
+                  onClick={() => setConfig({...config, tamanho: t})}
+                >
+                  {t}
+                </button>
+                {/* Medidas recuperadas para aparecerem por baixo */}
+                <span className="size-info">
+                  {t === 'S' ? '2.5cm' : t === 'M' ? '3.5cm' : '4.5cm'}
+                </span>
+              </div>
             ))}
           </div>
         </div>
@@ -156,8 +166,13 @@ const App = () => {
           </label>
         </div>
 
+        {/* BOTÃO COM ANIMAÇÃO DE LOADING MANTIDA */}
         <button className="btn-main" onClick={handleGerarPreview} disabled={loading}>
-          {loading ? 'A GERAR...' : 'VER PREVIEW 3D'}
+          {loading ? (
+            <span className="loader-container">
+              <div className="spinner"></div> A GERAR PREVIEW...
+            </span>
+          ) : 'VER PREVIEW 3D'}
         </button>
 
         {podeComprar && (
