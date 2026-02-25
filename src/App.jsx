@@ -24,7 +24,7 @@ const App = () => {
     petVet: '', obs: '', contactoEmergencia: ''
   });
 
-  // TUA LÓGICA DE NEGÓCIO: Mantida intacta
+  // TUA LÓGICA DE NEGÓCIO ORIGINAL
   useEffect(() => {
     if (config.tamanho === 'S') {
       setConfig(prev => ({ 
@@ -35,7 +35,7 @@ const App = () => {
     }
   }, [config.tamanho]);
 
-  // FUNÇÃO 1: Gerar Preview (Movida para aqui, fora do return)
+  // FUNÇÃO DE PREVIEW (Agora no lugar correto para evitar o ReferenceError)
   const handleGerarPreview = async () => {
     setLoading(true);
     setStlUrl(null);
@@ -60,7 +60,7 @@ const App = () => {
     }
   };
 
-  // FUNÇÃO 2: Finalizar Envio (WhatsApp + EmailJS)
+  // FUNÇÃO DE ENVIO (Com todos os teus parâmetros do template EmailJS)
   const finalizarEnvio = async (e) => {
     e.preventDefault();
 
@@ -88,7 +88,7 @@ const App = () => {
       import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
       templateParams,
       import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-    ).then(() => console.log("Email enviado!"), (err) => console.log("Erro email:", err));
+    ).then(() => console.log("Email enviado!")).catch(err => console.log("Erro:", err));
 
     const msg = `*PP3D.PT - NOVO PEDIDO DE ${tipoForm.toUpperCase()}*%0A%0A` +
       `*Dono:* ${formDados.donoNome}%0A` +
@@ -108,7 +108,6 @@ const App = () => {
            <h2>PP3D<span>.PT</span></h2>
         </div>
 
-        {/* INPUTS DE CONFIGURAÇÃO - Mantidos exatamente como tinhas */}
         <div className="input-block">
           <label>NOME DO PET (FRENTE)</label>
           <input type="text" maxLength={12} value={config.nome} 
@@ -142,7 +141,7 @@ const App = () => {
         </div>
 
         <div className={`nfc-panel ${config.tamanho === 'S' ? 'disabled' : ''}`} 
-             style={{opacity: config.tamanho === 'S' ? 0.5 : 1, marginBottom: '20px'}}>
+             style={{opacity: config.tamanho === 'S' ? 0.5 : 1}}>
           <input type="checkbox" id="nfc-toggle" checked={config.temNFC} disabled={config.tamanho === 'S'}
             onChange={e => setConfig({...config, temNFC: e.target.checked})} />
           <label htmlFor="nfc-toggle" style={{cursor: 'pointer', fontSize: '12px'}}>
@@ -150,13 +149,12 @@ const App = () => {
           </label>
         </div>
 
-        {/* BOTÃO QUE CHAMA A FUNÇÃO CORRIGIDA */}
         <button className="btn-main" onClick={handleGerarPreview} disabled={loading}>
           {loading ? 'A GERAR...' : 'VER PREVIEW 3D'}
         </button>
 
         {podeComprar && (
-          <button className="btn-buy" style={{marginTop: '10px'}} onClick={() => { setTipoForm('orcamento'); setShowModal(true); }}>
+          <button className="btn-buy" onClick={() => { setTipoForm('orcamento'); setShowModal(true); }}>
             🛒 FINALIZAR PEDIDO / ORÇAMENTO
           </button>
         )}
@@ -171,28 +169,35 @@ const App = () => {
          {stlUrl ? <Scene3D stlUrl={stlUrl} /> : <p>Configura a tua PetTag</p>}
       </div>
 
-      {/* MODAL COM OS TEUS CAMPOS NFC COMPLETOS */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>{tipoForm === 'orcamento' ? 'Dados para Faturação e NFC' : 'Contacto'}</h3>
             <form onSubmit={finalizarEnvio} className="grid-form">
-              <input type="text" placeholder="Nome do Dono" required onChange={e => setFormDados({...formDados, donoNome: e.target.value})} />
-              <input type="text" placeholder="NIF (Opcional)" onChange={e => setFormDados({...formDados, nif: e.target.value})} />
-              <input type="email" placeholder="Teu Email" className="full-width" required onChange={e => setFormDados({...formDados, donoEmail: e.target.value})} />
-              <input type="text" placeholder="Morada Completa" className="full-width" onChange={e => setFormDados({...formDados, morada: e.target.value})} />
+              <input type="text" placeholder="Nome do Dono" required 
+                onChange={e => setFormDados({...formDados, donoNome: e.target.value})} />
+              <input type="text" placeholder="NIF (Opcional)" 
+                onChange={e => setFormDados({...formDados, nif: e.target.value})} />
+              <input type="email" placeholder="Teu Email" className="full-width" required
+                onChange={e => setFormDados({...formDados, donoEmail: e.target.value})} />
+              <input type="text" placeholder="Morada Completa de Envio" className="full-width"
+                onChange={e => setFormDados({...formDados, morada: e.target.value})} />
 
               {config.temNFC && tipoForm === 'orcamento' && (
                 <>
-                  <h4 className="full-width">Ficha do Pet</h4>
+                  <h4 className="full-width">Ficha do Pet (Cartão Eletrónico)</h4>
                   <input type="text" placeholder="Raça" onChange={e => setFormDados({...formDados, petRaca: e.target.value})} />
                   <input type="date" onChange={e => setFormDados({...formDados, petNascimento: e.target.value})} />
-                  <input type="text" placeholder="Nº Chip" onChange={e => setFormDados({...formDados, petChip: e.target.value})} />
-                  <input type="text" placeholder="Telefone Emergência" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
-                  <textarea placeholder="Veterinário / Alergias" className="full-width" onChange={e => setFormDados({...formDados, petVet: e.target.value})} />
+                  <input type="text" placeholder="Nº Chip Veterinário" onChange={e => setFormDados({...formDados, petChip: e.target.value})} />
+                  <input type="text" placeholder="Contacto p/ Botão Chamada" onChange={e => setFormDados({...formDados, contactoEmergencia: e.target.value})} />
+                  <textarea placeholder="Dados Veterinários / Alergias" className="full-width"
+                    onChange={e => setFormDados({...formDados, petVet: e.target.value})} />
                 </>
               )}
-              <textarea placeholder="Observações" className="full-width" onChange={e => setFormDados({...formDados, obs: e.target.value})} />
+
+              <textarea placeholder="Observações Adicionais" className="full-width"
+                onChange={e => setFormDados({...formDados, obs: e.target.value})} />
+
               <div className="modal-actions full-width">
                 <button type="button" onClick={() => setShowModal(false)}>Cancelar</button>
                 <button type="submit" className="btn-confirm">Enviar Pedido</button>
